@@ -1,0 +1,180 @@
+:root {
+    --font-main: 'Outfit', sans-serif;
+    --bg-color: #000212;
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --primary-accent: #00c6ff;
+    --secondary-accent: #0072ff;
+    --text-main: #ffffff;
+    --snake-color: #ff4d4d;
+    --ladder-color: #4dff88;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    /* Simple starry bg fallback */
+    background-image: radial-gradient(white 1px, transparent 1px),
+        radial-gradient(white 1px, transparent 1px);
+    background-size: 50px 50px, 100px 100px;
+    background-position: 0 0, 25px 25px;
+}
+
+.container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 2rem;
+}
+
+/* Glass Panel */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Game Board */
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    width: 500px;
+    height: 500px;
+    border: 2px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.cell {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+/* Snakes and Ladders (SVG Overlay) */
+.board-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Player */
+.player {
+    width: 30px;
+    height: 30px;
+    background: var(--primary-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--primary-accent);
+    position: absolute;
+    z-index: 10;
+    transition: all 0.5s ease-in-out;
+    transform: translate(-50%, -50%);
+}
+
+/* Controls */
+.controls {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+h1 {
+    margin-bottom: 0.5rem;
+    background: linear-gradient(to right, #fff, var(--primary-accent));
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+#dice-display {
+    font-size: 4rem;
+    font-weight: 700;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-accent);
+    text-shadow: 0 0 20px rgba(0, 198, 255, 0.5);
+}
+
+.btn {
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+    color: #fff;
+    border: none;
+    border-radius: 3rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 114, 255, 0.5);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.status {
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.back-link {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    color: var(--primary-accent);
+}
+
+@media (max-width: 850px) {
+    .board {
+        width: 90vw;
+        height: 90vw;
+    }
+
+    .container {
+        flex-direction: column-reverse;
+    }
+}
