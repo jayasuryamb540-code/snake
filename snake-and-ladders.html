@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake and Ladders - Jayasurya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: 'Outfit', sans-serif;
+            --bg-color: #000212;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --primary-accent: #00c6ff;
+            --secondary-accent: #0072ff;
+            --text-main: #ffffff;
+            --snake-color: #ff4d4d;
+            --ladder-color: #4dff88;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            /* Simple starry bg fallback */
+            background-image: radial-gradient(white 1px, transparent 1px),
+                radial-gradient(white 1px, transparent 1px);
+            background-size: 50px 50px, 100px 100px;
+            background-position: 0 0, 25px 25px;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Game Board */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 500px;
+            height: 500px;
+            border: 2px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .cell {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+
+        /* Snakes and Ladders (SVG Overlay) */
+        .board-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Player */
+        .player {
+            width: 30px;
+            height: 30px;
+            background: var(--primary-accent);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary-accent);
+            position: absolute;
+            z-index: 10;
+            transition: all 0.5s ease-in-out;
+            transform: translate(-50%, -50%);
+            /* Centering fix calculated in JS */
+        }
+
+        /* Controls */
+        .controls {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, var(--primary-accent));
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        #dice-display {
+            font-size: 4rem;
+            font-weight: 700;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-accent);
+            text-shadow: 0 0 20px rgba(0, 198, 255, 0.5);
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            color: #fff;
+            border: none;
+            border-radius: 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 114, 255, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--primary-accent);
+        }
+
+        @media (max-width: 850px) {
+            .board {
+                width: 90vw;
+                height: 90vw;
+            }
+
+            .container {
+                flex-direction: column-reverse;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="portfolio.html" class="back-link">← Back to Portfolio</a>
+
+    <div class="container">
+        <div class="glass-panel controls">
+            <h1>Snake & Ladders</h1>
+            <p class="status" id="game-status">Start the game!</p>
+            <div id="dice-display">🎲</div>
+            <button id="roll-btn" class="btn">Roll Dice</button>
+            <button id="reset-btn" class="btn"
+                style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">Reset</button>
+        </div>
+
+        <div class="glass-panel" style="padding: 10px;">
+            <div class="board" id="board">
+                <svg class="board-overlay" id="board-svg">
+                    <!-- Lines drawn by JS -->
+                </svg>
+                <!-- Cells generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const boardSize = 10;
+        const totalCells = 100;
+        // Snakes: Start -> End (Go Down)
+        const snakes = { 16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 98: 78 };
+        // Ladders: Start -> End (Go Up)
+        const ladders = { 1: 38, 4: 14, 9: 31, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 80: 100 };
+
+        let playerPos = 1;
+        let isRolling = false;
+
+        const boardEl = document.getElementById('board');
+        const svgEl = document.getElementById('board-svg');
+        const statusEl = document.getElementById('game-status');
+        const diceEl = document.getElementById('dice-display');
+        const rollBtn = document.getElementById('roll-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // Create player element
+        const playerEl = document.createElement('div');
+        playerEl.className = 'player';
+        boardEl.appendChild(playerEl);
+
+        // ---- Initialization ----
+        function initBoard() {
+            // Generate Cells
+            boardEl.innerHTML = ''; // Clear
+            boardEl.appendChild(svgEl); // Re-add SVG
+            boardEl.appendChild(playerEl); // Re-add Player
+
+            // Create 100 cells
+            // Loop 100 down to 1 to match visual layout if we used simple flex, 
+            // BUT for Grid with zigzag, it's easier to map coord to ID.
+            // Let's just create divs and position strictly via CSS Grid?
+            // Actually, simply filling grid rows 1-10.
+
+            // Visual row 1 (top) is cells 100-91
+            // Visual row 10 (bottom) is cells 1-10
+
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    // Calculate cell number based on zigzag
+                    // Row 0 is top (logic row 9), Row 9 is bottom (logic row 0)
+                    let logicRow = (boardSize - 1) - row;
+                    let number;
+
+                    if (logicRow % 2 === 0) {
+                        // Even logic row (0, 2...) -> Left to Right
+                        number = logicRow * boardSize + col + 1;
+                    } else {
+                        // Odd logic row (1, 3...) -> Right to Left
+                        number = logicRow * boardSize + (boardSize - 1 - col) + 1;
+                    }
+
+                    cell.innerText = number;
+                    cell.dataset.num = number;
+                    cell.style.gridRow = row + 1;
+                    cell.style.gridColumn = col + 1;
+                    boardEl.appendChild(cell);
+                }
+            }
+
+            drawConnectors();
+            updatePlayerPosition(1, false); // Instant reset
+        }
+
+        // Helper to get center coordinates of a cell number relative to board
+        function getCellCenter(num) {
+            // Find the cell div
+            // Since we didn't store refs in array, query it.
+            // Optimization: could store in array.
+            const cells = document.querySelectorAll('.cell');
+            for (let cell of cells) {
+                if (parseInt(cell.dataset.num) === num) {
+                    return {
+                        x: cell.offsetLeft + cell.offsetWidth / 2,
+                        y: cell.offsetTop + cell.offsetHeight / 2
+                    };
+                }
+            }
+            return { x: 0, y: 0 };
+        }
+
+        // Draw Snakes and Ladders using SVG lines
+        function drawConnectors() {
+            let svgHTML = '';
+
+            // Draw Snakes (Red)
+            for (const [start, end] of Object.entries(snakes)) {
+                const s = getCellCenter(parseInt(start));
+                const e = getCellCenter(end);
+                svgHTML += `<line x1="${s.x}" y1="${s.y}" x2="${e.x}" y2="${e.y}" stroke="#ff4d4d" stroke-width="4" stroke-linecap="round" opacity="0.6" />`;
+                svgHTML += `<circle cx="${s.x}" cy="${s.y}" r="4" fill="#ff4d4d" />`; // Head
+            }
+
+            // Draw Ladders (Green)
+            for (const [start, end] of Object.entries(ladders)) {
+                const s = getCellCenter(parseInt(start));
+                const e = getCellCenter(end);
+                svgHTML += `<line x1="${s.x}" y1="${s.y}" x2="${e.x}" y2="${e.y}" stroke="#4dff88" stroke-width="4" stroke-linecap="round" stroke-dasharray="5,5" opacity="0.8" />`;
+            }
+
+            svgEl.innerHTML = svgHTML;
+        }
+
+        function updatePlayerPosition(num, animate = true) {
+            playerPos = num;
+            const coords = getCellCenter(playerPos);
+
+            playerEl.style.transition = animate ? 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' : 'none';
+            playerEl.style.left = coords.x + 'px';
+            playerEl.style.top = coords.y + 'px';
+        }
+
+        // Game Logic
+        async function rollDice() {
+            if (isRolling) return;
+            isRolling = true;
+            rollBtn.disabled = true;
+            statusEl.innerText = "Rolling...";
+
+            // Dice animation
+            let rolls = 0;
+            const maxRolls = 10;
+            const interval = setInterval(() => {
+                diceEl.innerText = Math.floor(Math.random() * 6) + 1;
+                rolls++;
+                if (rolls >= maxRolls) {
+                    clearInterval(interval);
+                    finalizeMove();
+                }
+            }, 60);
+        }
+
+        async function finalizeMove() {
+            const diceVal = Math.floor(Math.random() * 6) + 1;
+            diceEl.innerText = diceVal;
+            statusEl.innerText = `You rolled a ${diceVal}!`;
+
+            let nextPos = playerPos + diceVal;
+
+            if (nextPos > 100) {
+                statusEl.innerText = `Need ${100 - playerPos} to win!`;
+                isRolling = false;
+                rollBtn.disabled = false;
+                return;
+            }
+
+            // Move Player
+            updatePlayerPosition(nextPos);
+            await new Promise(r => setTimeout(r, 600)); // Wait for move
+
+            // Check Win
+            if (nextPos === 100) {
+                statusEl.innerText = "🎉 YOU WIN! 🎉";
+                // Fireworks or confetti could go here
+                isRolling = false;
+                return;
+            }
+
+            // Check Snake
+            if (snakes[nextPos]) {
+                statusEl.innerText = "Oh no! A snake! 🐍";
+                await new Promise(r => setTimeout(r, 500));
+                updatePlayerPosition(snakes[nextPos]);
+                statusEl.innerText = `Slid down to ${snakes[nextPos]}`;
+            }
+
+            // Check Ladder
+            if (ladders[nextPos]) {
+                statusEl.innerText = "Yay! A ladder! 🪜";
+                await new Promise(r => setTimeout(r, 500));
+                updatePlayerPosition(ladders[nextPos]);
+                statusEl.innerText = `Climbed up to ${ladders[nextPos]}`;
+            }
+
+            playerPos = parseInt(playerEl.style.left) ? playerPos : nextPos; // Sync just in case
+
+            // Final check after slide/climb
+            if (playerPos === 100) {
+                statusEl.innerText = "🎉 YOU WIN! 🎉";
+            } else {
+                statusEl.innerText = "Your turn to roll.";
+            }
+
+            isRolling = false;
+            rollBtn.disabled = false;
+        }
+
+        rollBtn.addEventListener('click', rollDice);
+        resetBtn.addEventListener('click', () => {
+            playerPos = 1;
+            updatePlayerPosition(1);
+            statusEl.innerText = "Start the game!";
+            diceEl.innerText = "🎲";
+            rollBtn.disabled = false;
+            isRolling = false;
+        });
+
+        // Initialize on Load
+        window.addEventListener('load', initBoard);
+        window.addEventListener('resize', () => {
+            drawConnectors();
+            updatePlayerPosition(playerPos, false);
+        });
+
+    </script>
+</body>
+
+</html>
